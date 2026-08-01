@@ -1,0 +1,19 @@
+[Type] PLUS       | [Literal] +
+[Type] PLUS       | [Literal] +
+[Type] ASSIGN     | [Literal] =
+[Type] ASSIGN     | [Literal] =
+[Type] MINUS      | [Literal] -
+[Type] MINUS      | [Literal] -
+[Type] INT        | [Literal] 09123
+[Type] PLUS       | [Literal] +
+[Type] ASSIGN     | [Literal] =
+[Type] MINUS      | [Literal] -
+[Type] MULTIPLY   | [Literal] *
+[Type] DIVIDE     | [Literal] /
+[Type] MINUS      | [Literal] -
+[Type] PLUS       | [Literal] +
+[Type] MINUS      | [Literal] -
+[Type] ILLEGAL    | [Literal] .
+[Type] IDENT      | [Literal] gay
+[Type] INT        | [Literal] 123
+[Type] ENDOF      | [Literal] 
