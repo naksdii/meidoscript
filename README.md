@@ -1,1 +1,1 @@
-# ussewa-script, btw
+# ussewa-script
