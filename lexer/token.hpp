@@ -1,44 +1,90 @@
-#pragma once
-#include "tokenType.hpp"
 #include <string>
-class token {
+#pragma once
+
+enum class TokenType {
+  // math operators
+  ASSIGN,
+  PLUS,
+  MINUS,
+  MULTIPLY,
+  DIVIDE,
+  POWER,
+
+  INCREMENT,
+  DECREMENT,
+
+  //  math comparation
+  LESS_EQUAL,
+  LESS,
+  GREATER,
+  GREATER_EQUAL,
+  EQUAL,
+  NOT_EQUAL,
+
+  //  logic operators
+  OR,
+  AND,
+  NOT,
+
+  // format
+  ENDOF,
+  SPACE,
+  SEMI,
+  ILLEGAL,
+
+  // delimitation
+  OPENBRACKET,
+  CLOSEBRACKET,
+  OPENPAREN,
+  CLOSEPAREN,
+  OPENCURLY,
+  CLOSECURLY,
+
+  // idk how to call these things
+  ARROW,
+  DOUBLEARROW,
+  DOT,
+  DOUBLECOLON,
+  COLON,
+
+  // types
+  INT,
+  IDENT,
+
+  // keywords
+  LET,
+  CLASS,
+  CONST,
+  FUN,
+  RETURN,
+  IF,
+  ELSE,
+  SWITCH,
+  CASE,
+  IMPORT,
+  FROM,
+  EXPORT,
+  // 67
+  WHILE,
+  FOR,
+  BREAK,
+  CONTINUE
+};
+
+class Token {
 private:
-  tokenType type;
+  TokenType type;
   std::string literal;
 
 public:
-  token(tokenType type, std::string literal) {
+  Token(TokenType type, std::string literal) {
     this->type = type;
     this->literal = literal;
   }
-  tokenType getType() {
-      return this->type;
+  Token(TokenType type) {
+    this->type = type;
+    this->literal = "";
   }
-  std::string getTypeName() {
-      switch (this->type) {
-      case tokenType::ILLEGAL:
-        return "ILLEGAL";
-      case tokenType::ENDOF:
-        return "ENDOF";
-      case tokenType::INT:
-        return "INT";
-      case tokenType::IDENT:
-        return "IDENT";
-      case tokenType::PLUS:
-        return "PLUS";
-      case tokenType::MINUS:
-        return "MINUS";
-      case tokenType::MULTIPLY:
-        return "MULTIPLY";
-      case tokenType::DIVIDE:
-        return "DIVIDE";
-      case tokenType::ASSIGN:
-        return "ASSIGN";
-      case tokenType::SEMI:
-        return "SEMI";
-      default:
-        return "UNKNOWN";
-      }
-  }
+  TokenType getType() { return this->type; }
   std::string getLiteral() { return this->literal; }
 };
