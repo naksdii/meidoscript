@@ -59,11 +59,26 @@ private:
       return '\0';
     return input[rc + 1];
   }
+  void skipComment() {
+    while (peek() != '\n') {
+      rc++;
+    }
+    return;
+  }
+
+  void skipCommentBlock() {
+    while (input[rc] != ']' && peek() != '>') {
+      rc++;
+    }
+    rc++;
+    return;
+  }
 
 public:
   Lexer(std::string input) : input(input), rc(0), inputSize(input.size()) {};
 
   Token nextToken();
+  /*
   std::vector<Token> tokenize() {
     std::vector<Token> tokens{};
     tokens.clear();
@@ -74,7 +89,7 @@ public:
     }
     tokens.push_back(Token(TokenType::ENDOF));
     return tokens;
-  }
+  }*/
 };
 
 inline Token Lexer::nextToken() {
@@ -115,6 +130,11 @@ inline Token Lexer::nextToken() {
     }
     return Token(TokenType::MULTIPLY);
   case '/':
+    if (peek() == '/') {
+      rc++;
+      skipComment();
+      break;
+    }
     return Token(TokenType::DIVIDE);
   case '=':
     switch (peek()) {
@@ -122,14 +142,11 @@ inline Token Lexer::nextToken() {
       rc++;
       return Token(TokenType::EQUAL);
     case '>':
-      rc++;
       if (peek() == '=') {
         rc++;
         return Token(TokenType::GREATER_EQUAL);
       }
       return Token(TokenType::DOUBLEARROW);
-    default:
-      break;
     }
     return Token(TokenType::ASSIGN);
   case ';':
@@ -154,11 +171,16 @@ inline Token Lexer::nextToken() {
     return Token(TokenType::OPENBRACKET);
   case ']':
     return Token(TokenType::CLOSEBRACKET);
-
+  case '<':
+    if (peek() == '[') {
+      rc++;
+      skipCommentBlock();
+    }
+    break;
   default:
-    return Token(TokenType::ILLEGAL, std::string(1, input[rc++]));
     break;
   }
+  rc--;
   if (isDigit(input[rc])) {
     while (isDigit(input[rc]) && rc != input.length()) {
       literal += input[rc]; // this concatenate the digit to the literal string.
@@ -171,6 +193,7 @@ inline Token Lexer::nextToken() {
            rc != input.length()) {
       literal += input[rc];
       rc++;
+      // let
     }
     if (keywords.find(literal) != keywords.end()) {
       return Token(keywords[literal], literal);
@@ -180,9 +203,10 @@ inline Token Lexer::nextToken() {
   return Token(TokenType::ILLEGAL, std::string(1, input[rc++]));
 }
 
+// example please to not run this fucntion
 const inline void test() {
   // u can use the lexer in your own project(probably u wont (T-T)
-  // to use this lexer in your own project, you can do something like this :
+  // to use this lexer in your own project, you can do something like this:
   FileManager file("input.txt");
   Lexer lexer(file.read());
   while (true) {

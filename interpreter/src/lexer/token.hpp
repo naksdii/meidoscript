@@ -1,7 +1,7 @@
 #include <string>
 #pragma once
 
-enum class TokenType {
+enum TokenType {
   // math operators
   ASSIGN,
   PLUS,
