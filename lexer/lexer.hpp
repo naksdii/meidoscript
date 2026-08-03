@@ -70,6 +70,7 @@ public:
     Token t = nextToken();
     while (t.getType() != TokenType::ENDOF) {
       tokens.push_back(t);
+      t = nextToken();
     }
     tokens.push_back(Token(TokenType::ENDOF));
     return tokens;
