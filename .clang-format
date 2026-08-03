@@ -1,0 +1,8 @@
+BasedOnStyle: LLVM
+
+IndentAccessModifiers: true
+ColumnLimit: 0
+PointerAlignment: Left
+ReferenceAlignment: Right
+AllowShortFunctionsOnASingleLine: All
+SortIncludes: true

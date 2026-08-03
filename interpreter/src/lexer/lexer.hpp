@@ -3,7 +3,6 @@
 #include "token.hpp"
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 /*
  _   _           _         _
@@ -15,81 +14,82 @@
 */
 
 class Lexer {
-private:
-  std::string input; // the input string to be tokenized.
-  int inputSize;     // dont recalculate ts everytime, CPU is slow.
-  size_t rc;         // read character
+  private:
+    std::string input; // the input string to be tokenized.
+    int inputSize;     // dont recalculate ts everytime, CPU is slow.
+    size_t rc;         // read character
 
-  /*
-    probably i should use a hash map for keywords, but for now this will do.
-  */
+    /*
+      probably i should use a hash map for keywords, but for now this will do.
+    */
 
-  std::unordered_map<std::string, TokenType> keywords = {
-      {"let", TokenType::LET},
-      {"class", TokenType::CLASS},
-      {"const", TokenType::CONST},
-      {"fun", TokenType::FUN},
-      {"if", TokenType::IF},
-      {"else", TokenType::ELSE},
-      {"switch", TokenType::SWITCH},
-      {"case", TokenType::CASE},
-      {"import", TokenType::IMPORT},
-      {"from", TokenType::FROM},
-      {"export", TokenType::EXPORT},
-      {"while", TokenType::WHILE},
-      {"for", TokenType::FOR},
-      {"break", TokenType::BREAK},
-      {"continue", TokenType::CONTINUE}};
+    std::unordered_map<std::string, TokenType> keywords = {
+        {"let", TokenType::LET},
+        {"class", TokenType::CLASS},
+        {"const", TokenType::CONST},
+        {"fun", TokenType::FUN},
+        {"if", TokenType::IF},
+        {"else", TokenType::ELSE},
+        {"switch", TokenType::SWITCH},
+        {"case", TokenType::CASE},
+        {"import", TokenType::IMPORT},
+        {"from", TokenType::FROM},
+        {"export", TokenType::EXPORT},
+        {"while", TokenType::WHILE},
+        {"for", TokenType::FOR},
+        {"break", TokenType::BREAK},
+        {"continue", TokenType::CONTINUE}};
 
-  // wa-wa T-T
-  /*
-  some function to check caracter types.
-  */
-  bool isWhitespace(char c) {
-    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
-  }
-  bool isDigit(char c) { /*i hate the default formatter need tp change it*/
-    return c >= '0' && c <= '9';
-  }
-  bool isLetter(char c) {
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-  }
-  char peek() {
-    if (rc + 1 >= inputSize)
-      return '\0';
-    return input[rc + 1];
-  }
-  void skipComment() {
-    while (peek() != '\n') {
+    // wa-wa T-T
+    /*
+    some function to check caracter types.
+    */
+    bool isWhitespace(char c) {
+      return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+    }
+    bool isDigit(char c) { /*i hate the default formatter need tp change it*/
+      return c >= '0' && c <= '9';
+    }
+    bool isLetter(char c) {
+      return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    char peek() {
+      if (rc + 1 >= inputSize)
+        return '\0';
+      return input[rc + 1];
+    }
+    void skipComment() {
+      while (peek() != '\n') {
+        rc++;
+      }
+      return;
+    }
+
+    void skipCommentBlock() {
+      while (input[rc] != ']' && peek() != '>') {
+        rc++;
+      }
       rc++;
+      return;
     }
-    return;
-  }
 
-  void skipCommentBlock() {
-    while (input[rc] != ']' && peek() != '>') {
-      rc++;
-    }
-    rc++;
-    return;
-  }
+  public:
+    Lexer(std::string input) : input(input), rc(0), inputSize(input.size()) {};
 
-public:
-  Lexer(std::string input) : input(input), rc(0), inputSize(input.size()) {};
-
-  Token nextToken();
-  /*
-  std::vector<Token> tokenize() {
-    std::vector<Token> tokens{};
-    tokens.clear();
-    Token t = nextToken();
-    while (t.getType() != TokenType::ENDOF) {
-      tokens.push_back(t);
-      t = nextToken();
-    }
-    tokens.push_back(Token(TokenType::ENDOF));
-    return tokens;
-  }*/
+    Token nextToken();
+    /*
+    std::vector<Token> tokenize() {
+      std::vector<Token> tokens{};
+      tokens.clear();
+      Token t = nextToken();
+      while (t.getType() != TokenType::ENDOF) {
+        tokens.push_back(t);
+        t = nextToken();
+      }
+      tokens.push_back(Token(TokenType::ENDOF));
+      return tokens;
+    }*/
 };
 
 inline Token Lexer::nextToken() {
@@ -196,7 +196,7 @@ inline Token Lexer::nextToken() {
       // let
     }
     if (keywords.find(literal) != keywords.end()) {
-      return Token(keywords[literal], literal);
+      return Token(keywords[literal]);
     }
     return Token(TokenType::IDENT, literal);
   }
