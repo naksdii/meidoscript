@@ -1,5 +1,9 @@
 # MEIDOSCRIPT
 
+**This is a 'new' generic programming language that MEIDO team is developing now.**
+
+<sub>the guy who wrote this readme is a complete dumb ass and does not know english as well as expected.</sub>
+
 Like I said initially, the project is just in it's development fase.
 Probably, it won't progress much, because we are NOT that skilled.
 
