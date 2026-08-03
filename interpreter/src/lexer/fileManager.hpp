@@ -1,15 +1,15 @@
 #include <fstream>
 #include <stdexcept>
 
-class fileManager {
+class FileManager {
 private:
   std::string filePath;
   std::fstream file;
   std::string content;
 
 public:
-  fileManager(std::string filePath) : filePath(filePath) {}
-  ~fileManager() { file.close(); }
+  FileManager(std::string filePath) : filePath(filePath) {}
+  ~FileManager() { file.close(); }
 
   std::string read() {
     file.open(filePath, std::ios::in);

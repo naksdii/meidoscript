@@ -3,3 +3,5 @@
 *.o
 input.*
 output.*
+*.env 
+# idk if there are some env files, i'll prevent it from happening

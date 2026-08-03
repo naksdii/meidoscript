@@ -77,7 +77,7 @@ public:
   }
 };
 
-Token Lexer::nextToken() {
+inline Token Lexer::nextToken() {
 
   std::string literal = "";
 
@@ -180,35 +180,14 @@ Token Lexer::nextToken() {
   return Token(TokenType::ILLEGAL, std::string(1, input[rc++]));
 }
 
-/*
-  u can use the lexer in your own project (probably u wont T-T).
-  to use this lexer in your own project, you can do something like this:
-  fileManager file("input.txt");
-  std::string input = file.read();
-  Lexer lexer(input);
+const inline void test() {
+  // u can use the lexer in your own project(probably u wont (T-T)
+  // to use this lexer in your own project, you can do something like this :
+  FileManager file("input.txt");
+  Lexer lexer(file.read());
   while (true) {
-    token t = lexer.nextToken();
+    Token t = lexer.nextToken();
 
-    then use t for what the fuck you want.
- }
-*/
-
-// example code below to test the lexer.
-/*
-int main() {
-  fileManager file("input.txt");
-  std::string input = file.read();
-  Lexer lexer(input);
-  while (true) {
-    token t = lexer.nextToken();
-
-    std::cout << "[Type] " << t.getType()
-              << ((((int)t.getType()) < 10) ? "  " : " ") << " | [Literal] "
-              << t.getLiteral() << std::endl;
-    if (t.getType() == tokenType::ENDOF) {
-      break;
-    }
+    // then use t for what the fuck you want.
   }
-  return 0;
-}
-*/
+};
