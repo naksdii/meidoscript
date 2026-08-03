@@ -12,7 +12,7 @@ Actually MEIDO team is composed only by 3 people:
 
 if you want the contribute with the project or report and issue:
 1. Go to 'issues' session.
-2. Open a new issue describing exactly ur suggestion or error.
+2. Open a new issue describing exactly your suggestion or error.
 3. please use [this](https://github.com/naksdii/meidoscript/issues/1#issue-5045232166) as example. 
 4. We will prefer simple titles, lol.
 
