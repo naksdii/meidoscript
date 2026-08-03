@@ -1,1 +1,0 @@
-# ussewa-script
