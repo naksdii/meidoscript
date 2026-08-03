@@ -8,7 +8,6 @@ Actually MEIDO team is composed only by 3 people:
 - [gibmn](https://github.com/Gibmn)
 - [naksdii](https://github.com/naksdii)
 
-<hr>
 # How can i contribute?
 
 if you want the contribute with the project or report and issue:
