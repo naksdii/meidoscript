@@ -1,9 +1,10 @@
 # MEIDOSCRIPT
 
-Like I said initially, the project is just in it's development fase. Probably, it won't evolve too much, because we are NOT that skilled.
+Like I said initially, the project is just in it's development fase.
+Probably, it won't progress much, because we are NOT that skilled.
 
 
-Actually MEIDO team is composed only by 3 people:
+Actually the MEIDO Team is composed only by 3 people:
 - [feroshina](https://github.com/feroshina)
 - [gibmn](https://github.com/Gibmn)
 - [naksdii](https://github.com/naksdii)
