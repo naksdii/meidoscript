@@ -1,6 +1,6 @@
 # MEIDOSCRIPT
 
-**This is a 'new' generic programming language that MEIDO team is developing now.**
+**This is a 'new' generic programming language that MEIDO Team is developing now.**
 
 Like I said initially, the project is just in it's development fase.
 Probably, it won't progress much, because we are NOT that skilled.
