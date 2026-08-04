@@ -14,13 +14,15 @@
 */
 
 class Lexer {
-  private:
+private:
+
     std::string input; // the input string to be tokenized.
     int inputSize;     // dont recalculate ts everytime, CPU is slow.
-    size_t rc;         // read character
+    size_t rc, column, line;
 
     /*
-      probably i should use a hash map for keywords, but for now this will do.
+      probably i should use a hash map for keywords, but for now this will
+      do.
     */
 
     std::unordered_map<std::string, TokenType> keywords = {
@@ -45,37 +47,57 @@ class Lexer {
     some function to check caracter types.
     */
     bool isWhitespace(char c) {
-      return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+        return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }
+
     bool isDigit(char c) { /*i hate the default formatter need tp change it*/
-      return c >= '0' && c <= '9';
+        return c >= '0' && c <= '9';
     }
+
     bool isLetter(char c) {
-      return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
     }
 
     char peek() {
-      if (rc + 1 >= inputSize)
-        return '\0';
-      return input[rc + 1];
+        if (rc + 1 >= inputSize)
+            return '\0';
+        return input[rc + 1];
     }
+
     void skipComment() {
-      while (peek() != '\n') {
-        rc++;
-      }
-      return;
+        while (peek() != '\n') {
+            next();
+        }
+        return;
     }
 
     void skipCommentBlock() {
-      while (input[rc] != ']' && peek() != '>') {
-        rc++;
-      }
-      rc++;
-      return;
+        while (input[rc] != ']' && peek() != '>') {
+            next();
+        }
+        next();
+        return;
     }
 
-  public:
-    Lexer(std::string input) : input(input), rc(0), inputSize(input.size()) {};
+    int next() {
+        rc++;
+        column++;
+        if (input[rc] != '\n')
+            return rc;
+        line++;
+        column = 1;
+        return rc;
+    }
+
+public:
+
+    Lexer(std::string input) {
+        this->input = input;
+        this->rc = 0;
+        this->line = 1;
+        this->column = 1;
+        this->inputSize = input.size();
+    };
 
     Token nextToken();
     /*
@@ -94,124 +116,152 @@ class Lexer {
 
 inline Token Lexer::nextToken() {
 
-  std::string literal = "";
+    std::string literal = "";
 
-  // EOF and whitespace handling
-  while (rc < inputSize && isWhitespace(input[rc])) {
-    rc++;
-  }
+    // EOF and whitespace handling
+    while (rc < inputSize && isWhitespace(input[rc])) {
+        next();
+    }
 
-  if (rc >= inputSize)
-    return Token(TokenType::ENDOF, "");
+    if (rc >= inputSize)
+        return Token(TokenType::ENDOF, line, column);
 
-  // tokenization logic
-  switch (input[rc++]) {
-  case '+':
-    if (peek() == '+') {
-      rc++;
-      return Token(TokenType::INCREMENT);
-    }
-    return Token(TokenType::PLUS);
-  case '-':
-    switch (peek()) {
-    case '>':
-      rc++;
-      return Token(TokenType::ARROW); // Damn, this switch drove me crazy.
-    case '-':
-      rc++;
-      return Token(TokenType::DECREMENT);
-    }
-    return Token(TokenType::MINUS, "-");
+    // tokenization logic
+    switch (input[rc]) {
+        case '+':
+            next();
+            if (peek() == '+') {
+                next();
+                return Token(TokenType::INCREMENT, line, column);
+            }
+            return Token(TokenType::PLUS, line, column);
+        case '-':
+            next();
+            switch (peek()) {
+                case '>':
+                    next();
+                    return Token(TokenType::ARROW,
+                                 line,
+                                 column); // Damn, this switch drove
+                                          // me crazy.
+                case '-':
+                    next();
+                    return Token(TokenType::DECREMENT, line, column);
+            }
+            return Token(TokenType::MINUS, line, column);
 
-  case '*':
-    if (peek() == '*') {
-      rc++;
-      return Token(TokenType::POWER);
+        case '*':
+            next();
+            if (peek() == '*') {
+                next();
+                return Token(TokenType::POWER, line, column);
+            }
+            return Token(TokenType::MULTIPLY, line, column);
+        case '/':
+            next();
+            if (peek() == '/') {
+                next();
+                skipComment();
+                break;
+            }
+            return Token(TokenType::DIVIDE, line, column);
+        case '=':
+            next();
+            switch (peek()) {
+                case '=':
+                    next();
+                    return Token(TokenType::EQUAL, line, column);
+                case '>':
+                    if (peek() == '=') {
+                        next();
+                        return Token(TokenType::GREATER_EQUAL, line, column);
+                    }
+                    return Token(TokenType::DOUBLEARROW, line, column);
+            }
+            return Token(TokenType::ASSIGN, line, column);
+        case ';':
+            next();
+            return Token(TokenType::SEMI, line, column);
+        case '.':
+            next();
+            return Token(TokenType::DOT, line, column);
+        case ':':
+            next();
+            if (peek() == ':') {
+                next();
+                return Token(TokenType::DOUBLECOLON, line, column);
+            }
+            return Token(TokenType::COLON, line, column);
+        case '(':
+            next();
+            return Token(TokenType::OPENPAREN, line, column);
+        case ')':
+            next();
+            return Token(TokenType::CLOSEPAREN, line, column);
+        case '{':
+            next();
+            return Token(TokenType::OPENCURLY, line, column);
+        case '}':
+            next();
+            return Token(TokenType::CLOSECURLY, line, column);
+        case '[':
+            next();
+            return Token(TokenType::OPENBRACKET, line, column);
+        case ']':
+            next();
+            return Token(TokenType::CLOSEBRACKET, line, column);
+        case '<':
+            next();
+            if (peek() == '[') {
+                next();
+                skipCommentBlock();
+            }
+            break;
+        default:
+            break;
     }
-    return Token(TokenType::MULTIPLY);
-  case '/':
-    if (peek() == '/') {
-      rc++;
-      skipComment();
-      break;
+    if (isDigit(input[rc])) {
+        while (isDigit(input[rc]) && rc != input.length()) {
+            literal += input[rc]; // this concatenate the digit to
+                                  // the literal string.
+            next();               // maybe it would be better to use substring?
+                                  // idk.
+        }
+        if (input[rc] == '.')
+            for (int i = 0;
+                 i < 15 && (isDigit(input[rc]) && rc != input.length());
+                 i++) {
+                literal += input[rc];
+                next();
+                return Token(TokenType::INT, literal, line, column);
+            }
     }
-    return Token(TokenType::DIVIDE);
-  case '=':
-    switch (peek()) {
-    case '=':
-      rc++;
-      return Token(TokenType::EQUAL);
-    case '>':
-      if (peek() == '=') {
-        rc++;
-        return Token(TokenType::GREATER_EQUAL);
-      }
-      return Token(TokenType::DOUBLEARROW);
+    if (isLetter(input[rc])) {
+        while ((isLetter(input[rc]) || isDigit(input[rc])) &&
+               rc != input.length()) {
+            literal += input[rc];
+            next();
+            // let
+        }
+        if (keywords.find(literal) != keywords.end()) {
+            return Token(keywords[literal], line, column);
+        }
+        return Token(TokenType::IDENT, literal, line, column);
     }
-    return Token(TokenType::ASSIGN);
-  case ';':
-    return Token(TokenType::SEMI);
-  case '.':
-    return Token(TokenType::DOT);
-  case ':':
-    if (peek() == ':') {
-      rc++;
-      return Token(TokenType::DOUBLECOLON);
-    }
-    return Token(TokenType::COLON);
-  case '(':
-    return Token(TokenType::OPENPAREN);
-  case ')':
-    return Token(TokenType::CLOSEPAREN);
-  case '{':
-    return Token(TokenType::OPENCURLY);
-  case '}':
-    return Token(TokenType::CLOSECURLY);
-  case '[':
-    return Token(TokenType::OPENBRACKET);
-  case ']':
-    return Token(TokenType::CLOSEBRACKET);
-  case '<':
-    if (peek() == '[') {
-      rc++;
-      skipCommentBlock();
-    }
-    break;
-  default:
-    break;
-  }
-  rc--;
-  if (isDigit(input[rc])) {
-    while (isDigit(input[rc]) && rc != input.length()) {
-      literal += input[rc]; // this concatenate the digit to the literal string.
-      rc++;                 // maybe it would be better to use substring? idk.
-    }
-    return Token(TokenType::INT, literal);
-  }
-  if (isLetter(input[rc])) {
-    while ((isLetter(input[rc]) || isDigit(input[rc])) &&
-           rc != input.length()) {
-      literal += input[rc];
-      rc++;
-      // let
-    }
-    if (keywords.find(literal) != keywords.end()) {
-      return Token(keywords[literal]);
-    }
-    return Token(TokenType::IDENT, literal);
-  }
-  return Token(TokenType::ILLEGAL, std::string(1, input[rc++]));
-}
+    return Token(
+        TokenType::ILLEGAL, std::string(1, input[next()]), line, column);
+};
 
 // example please to not run this fucntion
 const inline void test() {
-  // u can use the lexer in your own project(probably u wont (T-T)
-  // to use this lexer in your own project, you can do something like this:
-  FileManager file("input.txt");
-  Lexer lexer(file.read());
-  while (true) {
-    Token t = lexer.nextToken();
+    // u can use the lexer in your own project(probably u wont (T-T)
+    // to use this lexer in your own project, you can do something like
+    // this:
+    FileManager file("input.txt");
+    Lexer lexer(file.read());
+    while (true) {
+        Token t = lexer.nextToken();
 
-    // then use t for what the fuck you want.
-  }
+        // then use t for what the fuck you want.
+    }
 };

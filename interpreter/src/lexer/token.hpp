@@ -1,8 +1,10 @@
+#include <cstddef>
 #include <string>
 #pragma once
 
 enum TokenType {
-  // math operators
+  // math
+  // operators
   ASSIGN,
   PLUS,
   MINUS,
@@ -13,7 +15,8 @@ enum TokenType {
   INCREMENT,
   DECREMENT,
 
-  //  math comparation
+  //  math
+  //  comparation
   LESS_EQUAL,
   LESS,
   GREATER,
@@ -21,7 +24,8 @@ enum TokenType {
   EQUAL,
   NOT_EQUAL,
 
-  //  logic operators
+  //  logic
+  //  operators
   OR,
   AND,
   NOT,
@@ -40,7 +44,12 @@ enum TokenType {
   OPENCURLY,
   CLOSECURLY,
 
-  // idk how to call these things
+  // idk
+  // how
+  // to
+  // call
+  // these
+  // things
   ARROW,
   DOUBLEARROW,
   DOT,
@@ -72,19 +81,33 @@ enum TokenType {
 };
 
 class Token {
-private:
-  TokenType type;
-  std::string literal;
+  private:
+    TokenType type;
+    std::string literal;
+    size_t column;
+    size_t line;
 
-public:
-  Token(TokenType type, std::string literal) {
-    this->type = type;
-    this->literal = literal;
-  }
-  Token(TokenType type) {
-    this->type = type;
-    this->literal = "";
-  }
-  TokenType getType() { return this->type; }
-  std::string getLiteral() { return this->literal; }
+  public:
+    Token(TokenType type,
+          std::string literal,
+          size_t line,
+          size_t column)
+      : type(type)
+      , literal(literal)
+      , line(line)
+      , column(column) {}
+
+    Token(TokenType type, size_t line, size_t column)
+      : type(type) {
+      this->type = type;
+      this->literal = "";
+    }
+
+    TokenType getType() { return this->type; }
+
+    std::string getLiteral() { return this->literal; }
+
+    size_t getLine() { return this->line; }
+
+    size_t getColumn() { return this->column; }
 };

@@ -1,8 +1,21 @@
 BasedOnStyle: LLVM
 
+BreakConstructorInitializers: BeforeComma
+PackConstructorInitializers: Never
+
+ConstructorInitializerIndentWidth: 2
+
+BinPackParameters: false
+BinPackArguments: false
+
+BreakBeforeBraces: Attach
+
+
+MaxEmptyLinesToKeep: 10
+SeparateDefinitionBlocks: Always
+EmptyLineAfterAccessModifier: Always
+IndentCaseLabels: true
+AccessModifierOffset: 0
+IndentWidth: 2
 IndentAccessModifiers: true
-ColumnLimit: 0
-PointerAlignment: Left
-ReferenceAlignment: Right
-AllowShortFunctionsOnASingleLine: All
-SortIncludes: true
+ColumnLimit: 70
