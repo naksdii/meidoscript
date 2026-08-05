@@ -1,46 +1,59 @@
-#pragma once 
+#pragma once
 
 #include <fstream>
 #include <stdexcept>
 
 class FileManager {
-private:
-  std::string filePath;
-  std::fstream file;
-  std::string content;
+    private:
 
-public:
-  FileManager(std::string filePath) : filePath(filePath) {}
-  ~FileManager() { file.close(); }
+        std::string filePath;
+        std::fstream file;
+        std::string content;
 
-  std::string read() {
-    file.open(filePath, std::ios::in);
-    if (!file.is_open())
-      throw std::runtime_error("Could not read file: " + filePath);
+    public:
 
-    std::string line;
-    this->content = "";
+        FileManager(std::string filePath)
+          : filePath(filePath) {}
 
-    while (std::getline(file, line)) {
-      this->content += line + " ";
-    }
+        ~FileManager() { file.close(); }
 
-    file.close();
-    return this->content;
-  }
-  void write(std::string content, bool append = false) {
-    file.close();
+        std::string read() {
+            file.open(filePath, std::ios::in);
+            if (!file.is_open())
+                throw std::runtime_error("Could not read file: " + filePath);
 
-    if (append)
-      file.open(filePath, std::ios::out | std::ios::app);
-    else
-      file.open(filePath, std::ios::out | std::ios::trunc);
+            std::string line;
+            this->content = "";
 
-    if (!file.is_open())
-      throw std::runtime_error("Could not write to file: " + filePath);
+            while (std::getline(file, line)) {
+                this->content += line + " ";
+            }
 
-    file << content;
-    file.close();
-    return; 
-  }
+            file.close();
+            return this->content;
+        }
+
+        void write(std::string content, bool append = true) {
+            file.close();
+
+            if (append)
+                file.open(filePath, std::ios::out | std::ios::app);
+            else
+                file.open(filePath, std::ios::out | std::ios::trunc);
+
+            if (!file.is_open())
+                throw std::runtime_error("Could not write to file: " + filePath);
+
+            file << content;
+            file.close();
+            return;
+        }
+
+        void clean() {
+            file.close();
+            file.open(filePath, std::ios::out);
+            if (!file.is_open())
+                throw std::runtime_error("Could not write to file: " + filePath);
+            file << "";
+        }
 };
