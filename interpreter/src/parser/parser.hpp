@@ -5,6 +5,7 @@
 #include "../ast/statement.hpp"
 #include "../ast/statements/LetStatement.hpp"
 #include "../error/parseError.hpp"
+#include "../lexer/fileManager.hpp"
 #include "../lexer/lexer.hpp"
 #include <cstddef>
 #include <iostream>
@@ -16,9 +17,13 @@
 class Parser {
     private:
 
+        bool debug = true;
+
         std::vector<Token> tokens;
         size_t current = 0;
         Lexer lexer;
+        std::string debugPath = "debug.log";
+        FileManager debugLog = FileManager(debugPath);
 
         struct expr {};
 
@@ -118,23 +123,24 @@ class Parser {
 
         Parser(Lexer lexer)
           : lexer(lexer) {
-            std::cout << "parser init complete\n";
+            debugLog.clean();
+            debugLog.write("parser init complete\n");
         }
 
         void parse() {
-            std::cout << "started parsing" << std::endl;
+            debugLog.write("started parsing\n");
             Token currentToken = lexer.nextToken();
 
             while (currentToken.getType() != TokenType::ENDOF) {
                 tokens.push_back(currentToken);
                 currentToken = lexer.nextToken();
-                //  std::cout<<currentToken.getType();
+                debugLog.write("found a token from type: "+std::to_string(currentToken.getType())+"\n");
             }
             tokens.push_back(currentToken);
             try {
                 switch (tokens.at(0).getType()) {
                     case TokenType::LET:
-                        std::cout << "caso 34\n";
+                        debugLog.write("found a LET case;\n");
                         parse_LET();
                 }
             } catch (const ParseError &e) {
@@ -142,6 +148,6 @@ class Parser {
                 std::abort();
             }
 
-            std::cout << "okay;\n";
+            debugLog.write("okay;\n");
         }
 };
