@@ -1,113 +1,112 @@
+#pragma once
 #include <cstddef>
 #include <string>
-#pragma once
 
 enum TokenType {
-  // math
-  // operators
-  ASSIGN,
-  PLUS,
-  MINUS,
-  MULTIPLY,
-  DIVIDE,
-  POWER,
+    // math
+    // operators
+    ASSIGN,
+    PLUS,
+    MINUS,
+    MULTIPLY,
+    DIVIDE,
+    POWER,
 
-  INCREMENT,
-  DECREMENT,
+    INCREMENT,
+    DECREMENT,
 
-  //  math
-  //  comparation
-  LESS_EQUAL,
-  LESS,
-  GREATER,
-  GREATER_EQUAL,
-  EQUAL,
-  NOT_EQUAL,
+    //  math
+    //  comparation
+    LESS_EQUAL,
+    LESS,
+    GREATER,
+    GREATER_EQUAL,
+    EQUAL,
+    NOT_EQUAL,
 
-  //  logic
-  //  operators
-  OR,
-  AND,
-  NOT,
+    //  logic
+    //  operators
+    OR,
+    AND,
+    NOT,
 
-  // format
-  ENDOF,
-  SPACE,
-  SEMI,
-  ILLEGAL,
+    // format
+    ENDOF,
+    SPACE,
+    SEMI,
+    ILLEGAL,
 
-  // delimitation
-  OPENBRACKET,
-  CLOSEBRACKET,
-  OPENPAREN,
-  CLOSEPAREN,
-  OPENCURLY,
-  CLOSECURLY,
+    // delimitation
+    OPENBRACKET,
+    CLOSEBRACKET,
+    OPENPAREN,
+    CLOSEPAREN,
+    OPENCURLY,
+    CLOSECURLY,
 
-  // idk
-  // how
-  // to
-  // call
-  // these
-  // things
-  ARROW,
-  DOUBLEARROW,
-  DOT,
-  DOUBLECOLON,
-  COLON,
 
-  // types
-  INT,
-  IDENT,
+    ARROW,
+    DOUBLEARROW,
+    DOT,
+    DOUBLECOLON,
+    COLON,
 
-  // keywords
-  LET,
-  CLASS,
-  CONST,
-  FUN,
-  RETURN,
-  IF,
-  ELSE,
-  SWITCH,
-  CASE,
-  IMPORT,
-  FROM,
-  EXPORT,
-  // 67
-  WHILE,
-  FOR,
-  BREAK,
-  CONTINUE
+    // types
+    INT,
+    FLOAT,
+    IDENT,
+    STRING,
+    BOOL,
+
+    // keywords
+    LET,
+    CLASS,
+    CONST,
+    FUN,
+    RETURN,
+    IF,
+    ELSE,
+    SWITCH,
+    CASE,
+    IMPORT,
+    FROM,
+    EXPORT,
+    // 67
+    WHILE,
+    FOR,
+    BREAK,
+    CONTINUE
 };
 
 class Token {
-  private:
-    TokenType type;
-    std::string literal;
-    size_t column;
-    size_t line;
+    private:
 
-  public:
-    Token(TokenType type,
-          std::string literal,
-          size_t line,
-          size_t column)
-      : type(type)
-      , literal(literal)
-      , line(line)
-      , column(column) {}
+        TokenType type;
+        std::string literal;
+        long long int column = 0;
+        long long int line = 0;
 
-    Token(TokenType type, size_t line, size_t column)
-      : type(type) {
-      this->type = type;
-      this->literal = "";
-    }
+    public:
 
-    TokenType getType() { return this->type; }
+        Token(TokenType type, std::string literal, size_t line, size_t column)
+          : type(type)
+          , literal(literal)
+          , line(line)
+          , column(column) {}
 
-    std::string getLiteral() { return this->literal; }
+        Token(TokenType type, size_t line, size_t column)
+          : type(type) {
+            this->type = type;
+            this->literal = "";
+            this->line = line;
+            this->column = column;
+        }
 
-    size_t getLine() { return this->line; }
+        TokenType getType() { return this->type; }
 
-    size_t getColumn() { return this->column; }
+        std::string getLiteral() { return this->literal; }
+
+        long long int getLine() { return this->line; }
+
+        long long int getColumn() { return this->column; }
 };

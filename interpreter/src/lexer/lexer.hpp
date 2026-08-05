@@ -1,6 +1,7 @@
 #pragma once
 #include "fileManager.hpp"
 #include "token.hpp"
+#include <iostream>
 #include <string>
 #include <unordered_map>
 
@@ -14,108 +15,110 @@
 */
 
 class Lexer {
-private:
+    private:
 
-    std::string input; // the input string to be tokenized.
-    int inputSize;     // dont recalculate ts everytime, CPU is slow.
-    size_t rc, column, line;
+        std::string input; // the input string to be tokenized.
+        int inputSize;     // dont recalculate ts everytime, CPU is slow.
+        size_t rc, column = 0, line = 0;
 
-    /*
-      probably i should use a hash map for keywords, but for now this will
-      do.
-    */
+        /*
+          probably i should use a hash map for keywords, but for now this
+          will do.
+        */
 
-    std::unordered_map<std::string, TokenType> keywords = {
-        {"let", TokenType::LET},
-        {"class", TokenType::CLASS},
-        {"const", TokenType::CONST},
-        {"fun", TokenType::FUN},
-        {"if", TokenType::IF},
-        {"else", TokenType::ELSE},
-        {"switch", TokenType::SWITCH},
-        {"case", TokenType::CASE},
-        {"import", TokenType::IMPORT},
-        {"from", TokenType::FROM},
-        {"export", TokenType::EXPORT},
-        {"while", TokenType::WHILE},
-        {"for", TokenType::FOR},
-        {"break", TokenType::BREAK},
-        {"continue", TokenType::CONTINUE}};
+        std::unordered_map<std::string, TokenType> keywords = {
+            {"let", TokenType::LET},
+            {"class", TokenType::CLASS},
+            {"const", TokenType::CONST},
+            {"fun", TokenType::FUN},
+            {"if", TokenType::IF},
+            {"else", TokenType::ELSE},
+            {"switch", TokenType::SWITCH},
+            {"case", TokenType::CASE},
+            {"import", TokenType::IMPORT},
+            {"from", TokenType::FROM},
+            {"export", TokenType::EXPORT},
+            {"while", TokenType::WHILE},
+            {"for", TokenType::FOR},
+            {"break", TokenType::BREAK},
+            {"continue", TokenType::CONTINUE}};
 
-    // wa-wa T-T
-    /*
-    some function to check caracter types.
-    */
-    bool isWhitespace(char c) {
-        return c == ' ' || c == '\t' || c == '\n' || c == '\r';
-    }
-
-    bool isDigit(char c) { /*i hate the default formatter need tp change it*/
-        return c >= '0' && c <= '9';
-    }
-
-    bool isLetter(char c) {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-    }
-
-    char peek() {
-        if (rc + 1 >= inputSize)
-            return '\0';
-        return input[rc + 1];
-    }
-
-    void skipComment() {
-        while (peek() != '\n') {
-            next();
+        // wa-wa T-T
+        /*
+        some function to check caracter types.
+        */
+        bool isWhitespace(char c) {
+            return c == ' ' || c == '\t' || c == '\n' || c == '\r';
         }
-        return;
-    }
 
-    void skipCommentBlock() {
-        while (input[rc] != ']' && peek() != '>') {
-            next();
+        bool isDigit(
+            char c) { /*i hate the default formatter need tp change it*/
+            return c >= '0' && c <= '9';
         }
-        next();
-        return;
-    }
 
-    int next() {
-        rc++;
-        column++;
-        if (input[rc] != '\n')
+        bool isLetter(char c) {
+            return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+        }
+
+        char peek() {
+            if (rc + 1 >= inputSize)
+                return '\0';
+            return input[rc + 1];
+        }
+
+        void skipComment() {
+            while (peek() != '\n') {
+                next();
+            }
+            return;
+        }
+
+        void skipCommentBlock() {
+            while (input[rc] != ']' && peek() != '>') {
+                next();
+            }
+            next();
+            return;
+        }
+
+        int next() {
+            rc++;
+            column++;
+            if (input[rc] != '\n')
+                return rc;
+            line++;
+            column = 1;
             return rc;
-        line++;
-        column = 1;
-        return rc;
-    }
+        }
 
-public:
+    public:
 
-    Lexer(std::string input) {
-        this->input = input;
-        this->rc = 0;
-        this->line = 1;
-        this->column = 1;
-        this->inputSize = input.size();
-    };
+        Lexer(std::string input) {
+            this->input = input;
+            this->rc = 0;
+            this->line = 1;
+            this->column = 1;
+            this->inputSize = input.size();
+            std::cout << "lexer init complete\n";
+        };
 
-    Token nextToken();
-    /*
-    std::vector<Token> tokenize() {
-      std::vector<Token> tokens{};
-      tokens.clear();
-      Token t = nextToken();
-      while (t.getType() != TokenType::ENDOF) {
-        tokens.push_back(t);
-        t = nextToken();
-      }
-      tokens.push_back(Token(TokenType::ENDOF));
-      return tokens;
-    }*/
+        Token nextToken();
+        /*
+        std::vector<Token> tokenize() {
+          std::vector<Token> tokens{};
+          tokens.clear();
+          Token t = nextToken();
+          while (t.getType() != TokenType::ENDOF) {
+            tokens.push_back(t);
+            t = nextToken();
+          }
+          tokens.push_back(Token(TokenType::ENDOF));
+          return tokens;
+        }*/
 };
 
 inline Token Lexer::nextToken() {
-
+    std::cout << "requested next token\n";
     std::string literal = "";
 
     // EOF and whitespace handling
@@ -222,19 +225,18 @@ inline Token Lexer::nextToken() {
     }
     if (isDigit(input[rc])) {
         while (isDigit(input[rc]) && rc != input.length()) {
-            literal += input[rc]; // this concatenate the digit to
-                                  // the literal string.
+            literal += input[rc]; // this concatenate the digit to the literal string.
             next();               // maybe it would be better to use substring?
                                   // idk.
         }
-        if (input[rc] == '.')
-            for (int i = 0;
-                 i < 15 && (isDigit(input[rc]) && rc != input.length());
-                 i++) {
+        if (input[rc] == '.') {
+            for (int i = 0; i < 15 && (isDigit(input[rc]) && rc != input.length()); i++) {
                 literal += input[rc];
                 next();
-                return Token(TokenType::INT, literal, line, column);
             }
+            return Token(TokenType::FLOAT, literal, line, column);
+        }
+        return Token(TokenType::INT, literal, line, column);
     }
     if (isLetter(input[rc])) {
         while ((isLetter(input[rc]) || isDigit(input[rc])) &&
@@ -246,10 +248,11 @@ inline Token Lexer::nextToken() {
         if (keywords.find(literal) != keywords.end()) {
             return Token(keywords[literal], line, column);
         }
+        if (literal == "True" || literal == "False")
+            return Token(TokenType::BOOL, literal, line, column);
         return Token(TokenType::IDENT, literal, line, column);
     }
-    return Token(
-        TokenType::ILLEGAL, std::string(1, input[next()]), line, column);
+    return Token(TokenType::ILLEGAL, std::string(1, input[next()]), line, column);
 };
 
 // example please to not run this fucntion
