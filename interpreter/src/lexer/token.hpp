@@ -48,6 +48,7 @@ enum TokenType {
     ARROW,
     DOUBLEARROW,
     DOT,
+    COMMA,
     DOUBLECOLON,
     COLON,
 

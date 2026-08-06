@@ -5,8 +5,6 @@
 int main() {
   // basic setup
   FileManager file("./input.txt");
-  Lexer lexer(file.read());
-
-  Parser parser(lexer);
+  Parser parser(file.read(), true, "./logs/log");
   parser.parse();
 }
