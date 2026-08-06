@@ -1,12 +1,14 @@
 #pragma once
 
 #include "../ast/expression.hpp"
+#include "../ast/expressions/BinaryExpression.hpp"
 #include "../ast/expressions/PrimaryExpression.hpp"
+#include "../ast/expressions/UnaryExpression.hpp"
 #include "../ast/statement.hpp"
 #include "../ast/statements/LetStatement.hpp"
 #include "../error/parseError.hpp"
-#include "../lexer/fileManager.hpp"
 #include "../lexer/lexer.hpp"
+#include "../logger/logger.hpp"
 #include <cstddef>
 #include <iostream>
 #include <memory>
@@ -17,13 +19,11 @@
 class Parser {
     private:
 
-        bool debug = true;
 
         std::vector<Token> tokens;
         size_t current = 0;
         Lexer lexer;
-        std::string debugPath = "debug.log";
-        FileManager debugLog = FileManager(debugPath);
+        Logger logger;
 
         struct expr {};
 
@@ -74,8 +74,9 @@ class Parser {
                 return std::make_unique<LiteralExpression>(previous());
             }
             if (match(TokenType::IDENT)) {
-                return std::make_unique<LiteralExpression>(previous());
+                return std::make_unique<VariableExpression>(previous());
             }
+            
             if (match(TokenType::FLOAT)) {
                 return std::make_unique<LiteralExpression>(previous());
             }
@@ -89,8 +90,107 @@ class Parser {
             throwExprParseError();
         }
 
-        std::unique_ptr<Expression> parseExpression() {
+        std::unique_ptr<Expression> parseUnary() {
+            if (match(TokenType::MINUS) ||
+                match(TokenType::NOT)) {
+                Token op = previous();
+
+                auto expr = parseUnary();
+
+                return std::make_unique<UnaryExpression>(
+                    op,
+                    std::move(expr));
+            }
+
             return parsePrimaryExpression();
+        }
+
+        std::unique_ptr<Expression> parseMultiplication() {
+            auto left = parseUnary();
+
+            while (match(TokenType::MULTIPLY) || match(TokenType::DIVIDE)) {
+                Token op = previous();
+
+                auto right = parseUnary();
+
+                left = std::make_unique<BinaryExpression>(
+                    std::move(left),
+                    op,
+                    std::move(right));
+            }
+
+            return left;
+        }
+
+        std::unique_ptr<Expression> parseAddition() {
+            auto left = parseMultiplication();
+
+            while (match(TokenType::PLUS) || match(TokenType::MINUS)) {
+                Token op = previous();
+
+                auto right = parseMultiplication();
+
+                left = std::make_unique<BinaryExpression>(
+                    std::move(left),
+                    op,
+                    std::move(right));
+            }
+
+            return left;
+        }
+
+        std::unique_ptr<Expression> parseComparison() {
+            auto left = parseEquality();
+
+            while (match(TokenType::LESS) || match(TokenType::GREATER) || match(TokenType::LESS_EQUAL) || match(TokenType::GREATER_EQUAL)) {
+                Token op = previous();
+
+                auto right = parseEquality();
+
+                left = std::make_unique<BinaryExpression>(
+                    std::move(left),
+                    op,
+                    std::move(right));
+            }
+
+            return left;
+        }
+
+        std::unique_ptr<Expression> parseEquality() {
+            auto left = parseAddition();
+
+            while (match(TokenType::EQUAL) || match(TokenType::NOT_EQUAL)) {
+                Token op = previous();
+
+                auto right = parseAddition();
+
+                left = std::make_unique<BinaryExpression>(
+                    std::move(left),
+                    op,
+                    std::move(right));
+            }
+
+            return left;
+        }
+
+        std::unique_ptr<Expression> parseLogical() {
+            auto left = parseEquality();
+
+            while (match(TokenType::AND) || match(TokenType::OR)) {
+                Token op = previous();
+                auto right = parseEquality();
+
+                left = std::make_unique<BinaryExpression>(
+                    std::move(left),
+                    op,
+                    std::move(right));
+            }
+
+            return left;
+        }
+
+        std::unique_ptr<Expression> parseExpression() {
+            return parseLogical();
         }
 
         Token &peek() { return tokens[current]; }
@@ -121,26 +221,27 @@ class Parser {
 
     public:
 
-        Parser(Lexer lexer)
-          : lexer(lexer) {
-            debugLog.clean();
-            debugLog.write("parser init complete\n");
+        Parser(std::string filePath, bool debugmode, std::string logpath)
+          : lexer(filePath, debugmode, logpath)
+          , logger("../log/debug.log", debugmode) {
+
+            logger.log("parser init complete\n");
         }
 
         void parse() {
-            debugLog.write("started parsing\n");
+            logger.log("started parsing\n");
             Token currentToken = lexer.nextToken();
 
             while (currentToken.getType() != TokenType::ENDOF) {
                 tokens.push_back(currentToken);
                 currentToken = lexer.nextToken();
-                debugLog.write("found a token from type: "+std::to_string(currentToken.getType())+"\n");
+                logger.log("found a token from type: " + std::to_string(currentToken.getType()) + "\n");
             }
             tokens.push_back(currentToken);
             try {
                 switch (tokens.at(0).getType()) {
                     case TokenType::LET:
-                        debugLog.write("found a LET case;\n");
+                        logger.log("found a LET case;\n");
                         parse_LET();
                 }
             } catch (const ParseError &e) {
@@ -148,6 +249,6 @@ class Parser {
                 std::abort();
             }
 
-            debugLog.write("okay;\n");
+            logger.log("okay;\n");
         }
 };

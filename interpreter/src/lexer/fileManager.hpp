@@ -5,7 +5,6 @@
 
 class FileManager {
     private:
-
         std::string filePath;
         std::fstream file;
         std::string content;
@@ -18,6 +17,7 @@ class FileManager {
         ~FileManager() { file.close(); }
 
         std::string read() {
+            
             file.open(filePath, std::ios::in);
             if (!file.is_open())
                 throw std::runtime_error("Could not read file: " + filePath);

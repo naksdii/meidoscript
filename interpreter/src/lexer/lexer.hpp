@@ -1,4 +1,6 @@
 #pragma once
+#include "../error/lexError.hpp"
+#include "../logger/logger.hpp"
 #include "fileManager.hpp"
 #include "token.hpp"
 #include <iostream>
@@ -20,7 +22,7 @@ class Lexer {
         std::string input; // the input string to be tokenized.
         int inputSize;     // dont recalculate ts everytime, CPU is slow.
         size_t rc, column = 0, line = 0;
-
+        Logger logger;
         /*
           probably i should use a hash map for keywords, but for now this
           will do.
@@ -91,9 +93,14 @@ class Lexer {
             return rc;
         }
 
+        void throwLexError(std::string msg) {
+            throw LexError(msg);
+        }
+
     public:
 
-        Lexer(std::string input) {
+        Lexer(std::string input, bool debug = false, std::string log = "../logs/debug.log")
+          : logger(log, debug) {
             this->input = input;
             this->rc = 0;
             this->line = 1;
@@ -185,6 +192,10 @@ inline Token Lexer::nextToken() {
         case ';':
             next();
             return Token(TokenType::SEMI, line, column);
+        case ',':
+            next();
+            return Token(TokenType::COMMA, line, column);
+
         case '.':
             next();
             return Token(TokenType::DOT, line, column);
@@ -222,6 +233,20 @@ inline Token Lexer::nextToken() {
             break;
         default:
             break;
+    }
+    if (input[rc] == '"') {
+        rc++;
+
+        while (rc < input.size() && input[rc] != '"') {
+            literal += input[rc++];
+        }
+
+        if (rc >= input.size()) {
+            throwLexError("String não terminada.");
+        }
+
+        rc++;
+        return Token(TokenType::STRING, literal, line, column);
     }
     if (isDigit(input[rc])) {
         while (isDigit(input[rc]) && rc != input.length()) {
