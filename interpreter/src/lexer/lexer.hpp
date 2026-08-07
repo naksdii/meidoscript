@@ -99,14 +99,14 @@ class Lexer {
 
     public:
 
-        Lexer(std::string input, bool debug = false, std::string log = "../logs/debug.log")
+        Lexer(std::string input, bool debug, std::string log)
           : logger(log, debug) {
             this->input = input;
             this->rc = 0;
             this->line = 1;
             this->column = 1;
             this->inputSize = input.size();
-            std::cout << "lexer init complete\n";
+            logger.log("lexer init complete\n");
         };
 
         Token nextToken();
@@ -125,7 +125,7 @@ class Lexer {
 };
 
 inline Token Lexer::nextToken() {
-    std::cout << "requested next token\n";
+    logger.log("requested next token\n");
     std::string literal = "";
 
     // EOF and whitespace handling
@@ -278,18 +278,4 @@ inline Token Lexer::nextToken() {
         return Token(TokenType::IDENT, literal, line, column);
     }
     return Token(TokenType::ILLEGAL, std::string(1, input[next()]), line, column);
-};
-
-// example please to not run this fucntion
-const inline void test() {
-    // u can use the lexer in your own project(probably u wont (T-T)
-    // to use this lexer in your own project, you can do something like
-    // this:
-    FileManager file("input.txt");
-    Lexer lexer(file.read());
-    while (true) {
-        Token t = lexer.nextToken();
-
-        // then use t for what the fuck you want.
-    }
 };
