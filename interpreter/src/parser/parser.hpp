@@ -54,7 +54,7 @@ class Parser {
             Token name = consume(TokenType::IDENT);
 
             if (match(TokenType::SEMI)) {
-                std::cout << "\ndeclared " << name.getLiteral() << "\n";
+                logger.log("declared " + name.getLiteral() + "\n");
                 return std::make_unique<LetStatement>(name, nullptr);
             }
             consume(TokenType::ASSIGN);
@@ -62,7 +62,7 @@ class Parser {
             auto initializer = parseExpression();
 
             consume(TokenType::SEMI);
-            std::cout << "\ndeclared " << name.getLiteral() << " as something\n";
+            logger.log("declared " + name.getLiteral() + " as something\n");
             return std::make_unique<LetStatement>(name, std::move(initializer));
         }
 
@@ -76,7 +76,7 @@ class Parser {
             if (match(TokenType::IDENT)) {
                 return std::make_unique<VariableExpression>(previous());
             }
-            
+
             if (match(TokenType::FLOAT)) {
                 return std::make_unique<LiteralExpression>(previous());
             }
@@ -222,8 +222,8 @@ class Parser {
     public:
 
         Parser(std::string filePath, bool debugmode, std::string logpath)
-          : lexer(filePath, debugmode, logpath)
-          , logger("../log/debug.log", debugmode) {
+          : logger(logpath, debugmode)
+          , lexer(filePath, debugmode, logpath) {
 
             logger.log("parser init complete\n");
         }
@@ -245,8 +245,9 @@ class Parser {
                         parse_LET();
                 }
             } catch (const ParseError &e) {
-                std::cout << e.what() << '\n';
-                std::abort();
+                std::cout << e.what() << "";
+                logger.log(e.what());
+                std::exit(-67);
             }
 
             logger.log("okay;\n");
