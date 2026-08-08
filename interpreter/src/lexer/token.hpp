@@ -103,6 +103,8 @@ class Token {
             this->column = column;
         }
 
+        Token() {}
+
         TokenType getType() { return this->type; }
 
         std::string getLiteral() { return this->literal; }
