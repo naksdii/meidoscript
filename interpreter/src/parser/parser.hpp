@@ -4,6 +4,7 @@
 #include "../error/parseError.hpp"
 #include "../lexer/lexer.hpp"
 #include "../logger/logger.hpp"
+#include <cmath>
 #include <cstddef>
 #include <iostream>
 #include <memory>
@@ -90,17 +91,38 @@ class Parser {
 
             Token name = consume(TokenType::IDENT);
             Token returnType;
-            if (match(TokenType::ASSIGN)) {
+            advance();
+            if (match(TokenType::IDENT)) {
                 returnType = consume(TokenType::IDENT);
+                advance();
             }
+            std::vector<std::pair<TokenType, std::string>> parameters;
+
+            consume(TokenType::OPENPAREN);
+            while (match(TokenType::IDENT)) {
+                TokenType paramType = peek().getType();
+                bool isArray = false;
+
+                advance();
+
+                if (match(TokenType::OPENBRACKET)) {
+                    consume(TokenType::CLOSEBRACKET);
+                    isArray = true;
+                }
+
+                parameters.push_back({paramType, consume(TokenType::IDENT).getLiteral()});
+
+                advance();
+
+                if (match(TokenType::COMMA))
+                    consume(TokenType::COMMA);
+                break;
+            }
+            consume(TokenType::CLOSEPAREN);
             consume(TokenType::OPENCURLY);
-            std::vector<std::pair<Expression, std::string>> parameters;
-            while () {
-                auto initializer = parseExpression();
-            }
-            consume(TokenType::SEMI);
+
             logger.log("declared function " + name.getLiteral() + "\n");
-            return std::make_unique<ConstStatement>(name, std::move(initializer));
+            // return std::make_unique<DeclareFunctionStatement>(name, parameters, returnType, );
         }
 
         std::unique_ptr<Expression> parsePrimaryExpression() {
@@ -231,6 +253,31 @@ class Parser {
             return parseLogical();
         }
 
+        std::unique_ptr<Statement> parseStatement() {
+            try {
+                switch (tokens.at(0).getType()) {
+                    case TokenType::LET:
+                        logger.log("found a LET case;\n");
+                        parse_LET();
+                        break;
+                    case TokenType::CONST:
+                        logger.log("found a CONST case;\n");
+                        parse_CONST();
+                        break;
+                    case TokenType::FUN:
+                        logger.log("found a FUN case;\n");
+                        parse_FUN();
+                    default:
+                        throwParseError();
+                        break;
+                }
+            } catch (const ParseError &e) {
+                std::cout << e.what() << "";
+                logger.log(e.what());
+                std::exit(-67);
+            }
+        }
+
         Token &peek() { return tokens[current]; }
 
         Token &previous() { return tokens[current - 1]; }
@@ -276,29 +323,7 @@ class Parser {
                 logger.log("found a token from type: " + std::to_string(currentToken.getType()) + "\n");
             }
             tokens.push_back(currentToken);
-            try {
-                switch (tokens.at(0).getType()) {
-                    case TokenType::LET:
-                        logger.log("found a LET case;\n");
-                        parse_LET();
-                        break;
-                    case TokenType::CONST:
-                        logger.log("found a CONST case;\n");
-                        parse_CONST();
-                        break;
-                    case TokenType::FUN:
-                        logger.log("found a FUN case;\n");
-                        parse_FUN();
-                    default:
-                        throwParseError();
-                        break;
-                }
-            } catch (const ParseError &e) {
-                std::cout << e.what() << "";
-                logger.log(e.what());
-                std::exit(-67);
-            }
-
+            parseStatement();
             logger.log("okay;\n");
         }
 };
