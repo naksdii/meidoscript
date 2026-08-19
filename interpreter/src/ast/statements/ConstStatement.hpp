@@ -6,7 +6,7 @@
 #include <memory>
 #include <utility>
 
-class LetStatement : public Statement {
+class ConstStatement : public Statement {
     private:
 
         Token name;
@@ -14,7 +14,7 @@ class LetStatement : public Statement {
 
     public:
 
-        LetStatement(Token name, std::unique_ptr<Expression> initializer)
+        ConstStatement(Token name, std::unique_ptr<Expression> initializer)
           : name(name)
           , initializer(std::move(initializer)) {}
 };

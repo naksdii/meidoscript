@@ -1,14 +1,10 @@
 #pragma once
 
-#include "../ast/expression.hpp"
-#include "../ast/expressions/BinaryExpression.hpp"
-#include "../ast/expressions/PrimaryExpression.hpp"
-#include "../ast/expressions/UnaryExpression.hpp"
-#include "../ast/statement.hpp"
-#include "../ast/statements/LetStatement.hpp"
+#include "../ast/all.hpp"
 #include "../error/parseError.hpp"
 #include "../lexer/lexer.hpp"
 #include "../logger/logger.hpp"
+#include <cmath>
 #include <cstddef>
 #include <iostream>
 #include <memory>
@@ -30,6 +26,16 @@ class Parser {
         void throwParseError(TokenType type) {
             std::string msg = "Esperava: ";
             msg.append(std::to_string(type));
+            msg.append("\nin line: ");
+            msg.append(std::to_string(tokens[current].getLine()));
+            msg.append(", in column: ");
+            msg.append(std::to_string(tokens[current].getColumn()));
+            msg.append("\n");
+            throw ParseError(msg);
+        }
+
+        void throwParseError() {
+            std::string msg = "encontrou algum token invalido: ";
             msg.append("\nin line: ");
             msg.append(std::to_string(tokens[current].getLine()));
             msg.append(", in column: ");
@@ -66,6 +72,59 @@ class Parser {
             return std::make_unique<LetStatement>(name, std::move(initializer));
         }
 
+        std::unique_ptr<Statement> parse_CONST() {
+            consume(TokenType::CONST);
+
+            Token name = consume(TokenType::IDENT);
+
+            consume(TokenType::ASSIGN);
+
+            auto initializer = parseExpression();
+
+            consume(TokenType::SEMI);
+            logger.log("declared constant " + name.getLiteral() + " as something\n");
+            return std::make_unique<ConstStatement>(name, std::move(initializer));
+        }
+
+        std::unique_ptr<Statement> parse_FUN() {
+            consume(TokenType::FUN);
+
+            Token name = consume(TokenType::IDENT);
+            Token returnType;
+            advance();
+            if (match(TokenType::IDENT)) {
+                returnType = consume(TokenType::IDENT);
+                advance();
+            }
+            std::vector<std::pair<TokenType, std::string>> parameters;
+
+            consume(TokenType::OPENPAREN);
+            while (match(TokenType::IDENT)) {
+                TokenType paramType = peek().getType();
+                bool isArray = false;
+
+                advance();
+
+                if (match(TokenType::OPENBRACKET)) {
+                    consume(TokenType::CLOSEBRACKET);
+                    isArray = true;
+                }
+
+                parameters.push_back({paramType, consume(TokenType::IDENT).getLiteral()});
+
+                advance();
+
+                if (match(TokenType::COMMA))
+                    consume(TokenType::COMMA);
+                break;
+            }
+            consume(TokenType::CLOSEPAREN);
+            consume(TokenType::OPENCURLY);
+
+            logger.log("declared function " + name.getLiteral() + "\n");
+            // return std::make_unique<DeclareFunctionStatement>(name, parameters, returnType, );
+        }
+
         std::unique_ptr<Expression> parsePrimaryExpression() {
             if (match(TokenType::INT)) {
                 return std::make_unique<LiteralExpression>(previous());
@@ -88,6 +147,7 @@ class Parser {
                 return expr;
             }
             throwExprParseError();
+            return nullptr; // just beacuse the is a warning here and this fixes it
         }
 
         std::unique_ptr<Expression> parseUnary() {
@@ -193,6 +253,31 @@ class Parser {
             return parseLogical();
         }
 
+        std::unique_ptr<Statement> parseStatement() {
+            try {
+                switch (tokens.at(0).getType()) {
+                    case TokenType::LET:
+                        logger.log("found a LET case;\n");
+                        parse_LET();
+                        break;
+                    case TokenType::CONST:
+                        logger.log("found a CONST case;\n");
+                        parse_CONST();
+                        break;
+                    case TokenType::FUN:
+                        logger.log("found a FUN case;\n");
+                        parse_FUN();
+                    default:
+                        throwParseError();
+                        break;
+                }
+            } catch (const ParseError &e) {
+                std::cout << e.what() << "";
+                logger.log(e.what());
+                std::exit(-67);
+            }
+        }
+
         Token &peek() { return tokens[current]; }
 
         Token &previous() { return tokens[current - 1]; }
@@ -238,18 +323,7 @@ class Parser {
                 logger.log("found a token from type: " + std::to_string(currentToken.getType()) + "\n");
             }
             tokens.push_back(currentToken);
-            try {
-                switch (tokens.at(0).getType()) {
-                    case TokenType::LET:
-                        logger.log("found a LET case;\n");
-                        parse_LET();
-                }
-            } catch (const ParseError &e) {
-                std::cout << e.what() << "";
-                logger.log(e.what());
-                std::exit(-67);
-            }
-
+            parseStatement();
             logger.log("okay;\n");
         }
 };
