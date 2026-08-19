@@ -44,7 +44,8 @@ class Lexer {
             {"for", TokenType::FOR},
             {"break", TokenType::BREAK},
             {"continue", TokenType::CONTINUE}};
-
+        
+        std::
         // wa-wa T-T
         /*
         some function to check caracter types.
@@ -273,6 +274,7 @@ inline Token Lexer::nextToken() {
         if (keywords.find(literal) != keywords.end()) {
             return Token(keywords[literal], line, column);
         }
+        if (typewords.find(literal) != typewords.end())
         if (literal == "True" || literal == "False")
             return Token(TokenType::BOOL, literal, line, column);
         return Token(TokenType::IDENT, literal, line, column);

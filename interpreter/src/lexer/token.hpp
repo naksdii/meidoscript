@@ -58,6 +58,7 @@ enum TokenType {
     IDENT,
     STRING,
     BOOL,
+    TYPE,
 
     // keywords
     LET,
@@ -68,6 +69,7 @@ enum TokenType {
     IF,
     ELSE,
     SWITCH,
+
     CASE,
     IMPORT,
     FROM,
