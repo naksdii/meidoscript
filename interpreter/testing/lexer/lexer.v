@@ -68,3 +68,4 @@ fn format(code string) string {
 	}
 	return code
 }
+
